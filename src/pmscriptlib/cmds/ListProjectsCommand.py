@@ -1,4 +1,6 @@
 
+from tabulate import tabulate
+
 from .Command import Command
 
 from ..PMServer import PMServer
@@ -16,5 +18,11 @@ class ListProjectsCommand(Command):
         '''Perform command actions'''
         creds = self._load_creds(args)
         server = PMServer(creds)
+
+        rows = list()
         for proj in server.list_projects():
-            print(proj.name)
+            rows.append((
+                proj.name,
+                proj.status,
+                proj.uid))
+        print(tabulate(rows, headers=["Name", "Status", "UID"]))

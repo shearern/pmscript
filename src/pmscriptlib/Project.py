@@ -315,6 +315,18 @@ class Project(RestObject):
         return self._get_rest_data(self.LIST_LVL, 'prj_name')
 
     @property
+    def description(self):
+        return self._get_rest_data(self.LIST_LVL, 'prj_description')
+
+    @property
+    def category(self):
+        return self._get_rest_data(self.LIST_LVL, 'prj_category')
+
+    @property
+    def status(self):
+        return self._get_rest_data(self.LIST_LVL, 'prj_status')
+
+    @property
     def uid(self):
         return self.__uid
 
