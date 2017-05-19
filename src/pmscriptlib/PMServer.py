@@ -1,6 +1,6 @@
 
 from .RestObject import RestObject
-from .Project import Project
+from .Process import Process
 from .Case import Case
 from .RestIF import RestIF
 
@@ -11,9 +11,9 @@ class PMServer:
         self.__if = RestIF(creds)
 
 
-    def list_projects(self):
+    def list_processes(self):
         '''Get a list of projects'''
-        return Project.list_projects(self.__if)
+        return Process.list_processes(self.__if)
 
 
     def list_cases(self):

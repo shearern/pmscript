@@ -3,7 +3,7 @@ import requests
 from .RestObject import RestObject
 from .exceptions import RequestError
 
-class Project(RestObject):
+class Process(RestObject):
     '''
     A project on the server (process / workflow)
 
@@ -302,11 +302,11 @@ class Project(RestObject):
 
 
     def __repr__(self):
-        return 'Project(prj_uid="%s")' % (self.uid)
+        return 'Process(prj_uid="%s")' % (self.uid)
 
 
 
     @staticmethod
-    def list_projects(rif):
+    def list_processes(rif):
         for data in rif.get('{base}/api/1.0/{workspace}/project'):
-            yield Project(rif, data['prj_uid'], data=data, data_level=Project.LIST_LVL)
+            yield Process(rif, data['prj_uid'], data=data, data_level=Process.LIST_LVL)

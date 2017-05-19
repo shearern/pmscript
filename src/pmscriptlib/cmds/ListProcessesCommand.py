@@ -5,7 +5,7 @@ from .Command import Command
 
 from ..PMServer import PMServer
 
-class ListProjectsCommand(Command):
+class ListProcessesCommand(Command):
     '''List all of the projects (processes or workflows) defined'''
 
 
@@ -20,7 +20,7 @@ class ListProjectsCommand(Command):
         server = PMServer(creds)
 
         rows = list()
-        for proj in server.list_projects():
+        for proj in server.list_processes():
             rows.append((
                 proj.name,
                 proj.status,
