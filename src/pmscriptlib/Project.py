@@ -271,64 +271,30 @@ class Project(RestObject):
 
     '''
 
-    LIST_LVL=1
-    DETAIL_LVL=2
 
-    def __init__(self, creds, prj_uid, data=None, data_level=None):
-        super(Project, self).__init__(creds)
-        self.__uid = prj_uid
-        self.__data = data
-        self.__data_level = data_level
+    @property
+    def _uid_key(self):
+        return 'prj_uid'
 
 
-    def _retrieve_detail(self):
-        # Retrieve project details
-        url = '{base}/api/1.0/{workspace}/project/{uid}'.format(
-            base = self.creds.base_url,
-            workspace = self.creds.workspace,
-            uid = self.__uid)
-        headers = {
-            'Authorization': 'Bearer ' + self.creds.access_token,
-        }
-        r = requests.get(url)
-        if not r.ok:
-            raise RequestError("Failed to retrieve project %s details: %s" % (
-                self.__uid, r.text))
-
-        self.__data = r.json()
-        self.__data_level = self.DETAIL_LVL
-
-        try:
-            assert(self.__data['prj_uid'] == self.__uid)
-        except:
-            raise RequestError("Requested project %s, but got %s" % (self.__uid, self.__data))
-
-
-    def _get_rest_data(self, level, key):
-        if self.__data is None or self.__data_level is None or self.__data_level < level:
-            self._retrieve_detail()
-        return self.__data[key]
-
+    def _detail_url(self):
+        return '{base}/api/1.0/{workspace}/project/%s' % (self.uid)
 
     @property
     def name(self):
-        return self._get_rest_data(self.LIST_LVL, 'prj_name')
+        return self._rest_obj_attr(self.LIST_LVL, 'prj_name')
 
     @property
     def description(self):
-        return self._get_rest_data(self.LIST_LVL, 'prj_description')
+        return self._rest_obj_attr(self.LIST_LVL, 'prj_description')
 
     @property
     def category(self):
-        return self._get_rest_data(self.LIST_LVL, 'prj_category')
+        return self._rest_obj_attr(self.LIST_LVL, 'prj_category')
 
     @property
     def status(self):
-        return self._get_rest_data(self.LIST_LVL, 'prj_status')
-
-    @property
-    def uid(self):
-        return self.__uid
+        return self._rest_obj_attr(self.LIST_LVL, 'prj_status')
 
 
     def __str__(self):
@@ -341,16 +307,6 @@ class Project(RestObject):
 
 
     @staticmethod
-    def list_projects(creds):
-        url = '{base}/api/1.0/{workspace}/project'.format(
-            base = creds.base_url,
-            workspace = creds.workspace)
-        headers = {
-            'Authorization': 'Bearer ' + creds.access_token,
-        }
-        r = requests.get(url, headers=headers)
-        if not r.ok:
-            raise RequestError("Failed to list projects: %s" % (r.text))
-
-        for data in r.json():
-            yield Project(creds, data['prj_uid'], data=data, data_level=Project.LIST_LVL)
+    def list_projects(rif):
+        for data in rif.get('{base}/api/1.0/{workspace}/project'):
+            yield Project(rif, data['prj_uid'], data=data, data_level=Project.LIST_LVL)

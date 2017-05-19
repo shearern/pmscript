@@ -5,7 +5,7 @@ import requests
 
 from .exceptions import CredentialsError
 
-class Credentials(object):
+class Credentials:
     '''Credentials stores data about how to access the API'''
 
     def __init__(self, path):
@@ -18,7 +18,7 @@ class Credentials(object):
         self.username = None
         self.__stored_password = None
         self.__asked_password = None
-        self.__access_token = None
+        self.access_token = None
 
 
     @property
@@ -35,7 +35,7 @@ class Credentials(object):
                     'client_secret': self.client_secret,
                     'username': self.username,
                     'password': self.__stored_password,
-                    'access_token': self.__access_token,
+                    'access_token': self.access_token,
                 },
                 fp=fh,
                 sort_keys=True,
@@ -70,7 +70,7 @@ class Credentials(object):
         self.client_secret = _get_required('client_secret')
         self.username = _get_required('username')
         self.__stored_password = _get_optional('password')
-        self.__access_token = _get_optional('access_token')
+        self.access_token = _get_optional('access_token')
 
 
     @property
@@ -85,37 +85,3 @@ class Credentials(object):
     def password(self, value):
         self.__stored_password = value
 
-
-    @property
-    def access_token(self):
-        '''Cache access token in creds file to speed up repeat command calls'''
-
-        if self.__access_token is None:
-
-            # Assemble credentials for login
-            request_data = {
-                'client_id':        self.client_id,
-                'grant_type':       'password',
-                'username':         self.username,
-                'password':         self.password,
-                'client_secret':    self.client_secret,
-            }
-
-            # Perform login
-            headers = {
-                'Content-Type': "application/json",
-            }
-            url = '{base}/{workspace}/oauth2/token'.format(
-                base = self.base_url,
-                workspace = self.workspace)
-            r = requests.post(url, headers=headers, data=json.dumps(request_data))
-
-            if not r.ok:
-                raise CredentialsError("Failed to login: %s" % (r.text))
-            else:
-                response_data = r.json()
-                self.__access_token = response_data['access_token']
-
-                self.save()
-
-        return self.__access_token

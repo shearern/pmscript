@@ -101,3 +101,4 @@ ENV/
 .mypy_cache/
 src/test.py
 test_creds
+.test_creds.cache
