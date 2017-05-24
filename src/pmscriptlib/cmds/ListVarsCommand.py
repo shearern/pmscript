@@ -1,3 +1,5 @@
+import sys
+
 from tabulate import tabulate
 
 from .Command import Command
@@ -41,6 +43,9 @@ class ListVarsCommand(Command):
 
         # Find requested case
         case = server.find_case(process=args.process, name=args.case)
+        if case is None:
+            print("ERROR: Couldn't find case '%s'" % (args.case))
+            sys.exit(2)
 
         # Collect variables
         vars = case.variables
