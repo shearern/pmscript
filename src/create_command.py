@@ -63,17 +63,21 @@ class {class_name}(Command):
     # Import
     token = '# Import CMDs here'
     try:
-        src.insert(src.index(token)+1, 'from .{class_name) import {class_name}'.format(class_name=class_name))
-    except ValueError:
+        i = src.index(token)
+        src.insert(i, 'from .{class_name} import {class_name}'.format(class_name=class_name))
+    except ValueError as e:
         print("ERROR: Failed to find token: " + token)
 
     # Add to list of classes
     token = '    # Add CMD class here'
     try:
-        src.insert(src.index(token)+1, '    {class_name}(),'.format(class_name=class_name))
+        i = src.index(token)
+        src.insert(i, '    {class_name}(),'.format(class_name=class_name))
     except ValueError:
         print("ERROR: Failed to find token: " + token)
 
+    print("Modifying", path)
     with open(path, 'w') as fh:
         fh.write("\n".join(src))
 
+    print("Finished")

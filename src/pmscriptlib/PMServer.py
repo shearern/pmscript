@@ -73,6 +73,44 @@ class PMServer:
         return found
 
 
+    def find_process(self, name):
+        '''
+        Find a case by it's name or UID
+
+        :param name:
+            Either all or part of the uid (begin or end), or the name of the process
+            If UID, then must be at least 6 characters
+        '''
+
+        found = None
+
+        # Is process UID cached
+        hit = False
+        cache_key = 'Process.UID.search.%s' % (name)
+        if self.rif.cache.has(cache_key):
+            cached_prc = Process(self.rif, uid=self.rif.cache[cache_key]) # TODO: Need to check if uid is deleted?
+            found = cached_prc
+            hit = True
+
+        # List processes to find
+        for process in self.list_processes():
+            if process.name == name:
+                found = process
+            elif len(process.uid) >= 6:
+                if process.uid.startswith(name) or process.uid.endswith(name):
+                    found = process
+
+        if found is None:
+            return None
+
+        # Cache results
+        if found is not None:
+            if not hit:
+                self.rif.cache[cache_key] = found.uid
+
+        return found
+
+
     def find_tasks(self, name=None, process=None):
         '''
         Find a case by it's name or UID

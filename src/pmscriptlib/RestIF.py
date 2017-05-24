@@ -112,7 +112,7 @@ class RestIF:
 
 
 
-    def put(self, url, data=None):
+    def put(self, url, data=None, use_post=False):
         '''
         Make a PUT reqest and check for errors
 
@@ -133,7 +133,10 @@ class RestIF:
         }
 
         # Make Request
-        r = requests.put(url, headers=headers, data=data)
+        if use_post:
+            r = requests.post(url, headers=headers, json=data)
+        else:
+            r = requests.put(url, headers=headers, json=data)
 
         # Check response
         if not r.ok:
@@ -165,7 +168,21 @@ class RestIF:
             try:
                 raise RequestError("Got error %s while accessing %s" % (response_data['error']['message'], url))
             except:
-                raise RequestError("Got responce %s while accessing %s" % (response_data, url))
+                raise RequestError("Got response %s while accessing %s" % (response_data, url))
+
+        # Get return data
+        try:
+            return r.json()
+        except ValueError:
+            return r.text
 
 
 
+    def post(self, url, data=None):
+        '''
+        Make a POST reqest and check for errors
+
+        :param url: URL to post to (with {base} and {workspace}
+        :param data: Data to post
+        '''
+        return self.put(url, data, use_post=True)

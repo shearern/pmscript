@@ -42,4 +42,7 @@ if __name__ == '__main__':
         sys.exit(1)
     except CredentialsError as e:
         print("AUTH ERROR:", str(e))
+        sys.exit(1)
+    except RequestError as e:
+        print("Error encountered in API request:\n%s" % (str(e)))
 

@@ -158,9 +158,39 @@ class Case(RestObject):
         return Task.list_tasks_for_case(self.rif, self.uid)
 
 
+    def route(self):
+        '''Route the process to the next task'''
+        url = '{base}/api/1.0/{workspace}/cases/%s/route-case' % (self.uid)
+        self.rif.put(url)
+
     @staticmethod
     def list_cases(rif):
         for data in rif.get('{base}/api/1.0/{workspace}/cases'):
             yield Case(rif, data['app_uid'], data=data, data_level=Case.LIST_LVL)
 
+
+    @staticmethod
+    def create(rif, process_uid, start_task_uid, variables=None):
+        '''
+        Create a new process
+
+        :param rif: RestIF
+        :param process_uid: UID of procerss to start
+        :param start_task_uid: UID of task to use to start this process
+        :param variables: Dictionary of variables to set
+        :return: Case created
+        '''
+
+        url = '{base}/api/1.0/{workspace}/cases'
+
+        data = {
+            'pro_uid': process_uid,
+            'tas_uid': start_task_uid,
+        }
+        if variables is not None:
+            data['variables'] = list((variables, ))
+
+        rtn = rif.post(url, data=data)
+
+        return Case(rif, uid=rtn['app_uid'])
 

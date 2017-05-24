@@ -4,7 +4,7 @@ from .exceptions import RequestError
 
 from .RestObject import RestObject
 from .StartingTask import StartingTask
-
+from .Case import Case
 
 class Process(RestObject):
     '''
@@ -317,3 +317,39 @@ class Process(RestObject):
     def list_processes(rif):
         for data in rif.get('{base}/api/1.0/{workspace}/project'):
             yield Process(rif, data['prj_uid'], data=data, data_level=Process.LIST_LVL)
+
+
+
+    def start(self, start_task_uid=None, variables=None, route=True):
+        '''
+        Start a new process (create a case)
+
+        :param variables: Dictionary of variables to set on the new case
+        :param start_task_uid:
+            Which of the entry points (starting tasks) to use to start the process
+            If not speicified, then defaults if only one start task is available
+        :param route:
+            If false, then case begins in a draft state
+            If true, call .route() on case to move out of draft status
+        :return: Case
+        '''
+
+        # Determine start_task_uid
+        if start_task_uid is None:
+            for start_task in self.list_start_tasks():
+                if start_task_uid is not None:
+                    raise RequestError(
+                        "Multiple start tasks exists for %s.  Must specify which to use" % (
+                            self.name))
+                else:
+                    start_task_uid = start_task.uid
+
+        # Create case
+        case = Case.create(self.rif, self.uid, start_task_uid, variables)
+
+        # Route to go to next task in process
+        if route:
+            case.route()
+
+        return case
+
