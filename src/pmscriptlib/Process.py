@@ -1,7 +1,10 @@
 import requests
 
-from .RestObject import RestObject
 from .exceptions import RequestError
+
+from .RestObject import RestObject
+from .StartingTask import StartingTask
+
 
 class Process(RestObject):
     '''
@@ -303,6 +306,10 @@ class Process(RestObject):
 
     def __repr__(self):
         return 'Process(uid="%s")' % (self.uid)
+
+
+    def list_start_tasks(self):
+        return StartingTask.list_start_tasks_for_process(self.rif, self.uid)
 
 
 

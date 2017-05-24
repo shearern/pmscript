@@ -15,6 +15,37 @@ class ListTasksCommand(Command):
         parser.add_argument('--case', help="Name or UID of the case to list tasks for.")
 
 
+    def run(self, args):
+        '''Perform command actions'''
+
+        creds = self._load_creds(args)
+        server = PMServer(creds)
+
+        for case in self._list_cases_to_use(server, args):
+            print('Case "%s" in process %s:' % (case.name, case.process.name))
+
+            rows = list()
+            for task in case.list_current_tasks():
+
+                if task.started:
+                    started = 'yes'
+                else:
+                    started = 'no'
+
+                rows.append([
+                    task.name,
+                    task.type,
+                    task.description,
+                    task.username,
+                    started,
+                    task.status,
+                    task.uid,
+                ])
+
+            print(tabulate(rows, headers=[
+                'Name', 'Type', 'Description', 'Assigned', 'Started', 'Status', "UID"]))
+
+
     def _list_cases_to_use(self, server, args):
         '''Find cases to search for tasks for'''
 
@@ -47,35 +78,3 @@ class ListTasksCommand(Command):
             yield case
 
 
-    def run(self, args):
-        '''Perform command actions'''
-
-        creds = self._load_creds(args)
-        server = PMServer(creds)
-
-        for case in self._list_cases_to_use(server, args):
-            print('Case "%s" in process %s:' % (case.name, case.process.name))
-
-            rows = list()
-            for task in case.list_current_tasks():
-
-                if task.started:
-                    started = 'yes'
-                else:
-                    started = 'no'
-
-                rows.append([
-                    task.name,
-                    task.type,
-                    task.description,
-                    task.username,
-                    started,
-                    task.status,
-                    task.uid,
-                ])
-
-            print(tabulate(rows, headers=[
-                'Name', 'Type', 'Description', 'Assigned', 'Started', 'Status', "UID"]))
-
-
-    

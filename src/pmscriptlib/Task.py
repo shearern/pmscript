@@ -1,7 +1,7 @@
 import requests
 
 from .RestObject import RestObject
-from .exceptions import RequestError
+from .exceptions import RestAttributeMissing
 
 class Task(RestObject):
     '''
@@ -58,7 +58,7 @@ class Task(RestObject):
 
 
     def __init__(self, rif, case_uid, uid, data=None, data_level=1):
-        if data_level > 2:
+        if data_level > self.LIST_LVL:
             raise Exception("I don't think you can get task detail...")
         self.__case_uid = case_uid
         super(Task, self).__init__(rif, uid, data, data_level)
@@ -80,8 +80,21 @@ class Task(RestObject):
 
 
     @property
+    def process_uid(self):
+        return self._rest_obj_attr(self.LIST_LVL, 'pro_uid')
+
+
+    @property
+    def process(self):
+        return self._assoc_rest_obj('Process', self.process_uid)
+
+
+    @property
     def name(self):
-        return self._rest_obj_attr(self.LIST_LVL, 'tas_title')
+        try:
+            return self._rest_obj_attr(self.LIST_LVL, 'tas_title')
+        except RestAttributeMissing:
+            return "Unknown"
 
 
     def __str__(self):
@@ -128,3 +141,5 @@ class Task(RestObject):
     def list_tasks_for_case(rif, case_uid):
         for data in rif.get('{base}/api/1.0/{workspace}/cases/%s/tasks' % (case_uid)):
             yield Task(rif, case_uid, data['tas_uid'], data=data, data_level=Task.LIST_LVL)
+
+

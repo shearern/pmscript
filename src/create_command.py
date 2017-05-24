@@ -1,6 +1,7 @@
 '''Create a new command class'''
 import os
 import sys
+from textwrap import dedent
 
 if __name__ == '__main__':
 
@@ -51,10 +52,28 @@ class {class_name}(Command):
             class_name = class_name,
             help = help))
 
-
     print("")
+
+    # === Add class to __init__.py ===
     path = os.path.abspath(os.path.join(os.path.dirname(__file__),
                            'pmscriptlib', 'cmds', '__init__.py'))
-    print("Add to ALL_CMDS in %s:" % (path))
-    print("  from .%s import %s" % (class_name, class_name))
-    print("  %s()," % (class_name))
+    with open(path, 'r') as fh:
+        src = [line.rstrip() for line in fh.readlines()]
+
+    # Import
+    token = '# Import CMDs here'
+    try:
+        src.insert(src.index(token)+1, 'from .{class_name) import {class_name}'.format(class_name=class_name))
+    except ValueError:
+        print("ERROR: Failed to find token: " + token)
+
+    # Add to list of classes
+    token = '    # Add CMD class here'
+    try:
+        src.insert(src.index(token)+1, '    {class_name}(),'.format(class_name=class_name))
+    except ValueError:
+        print("ERROR: Failed to find token: " + token)
+
+    with open(path, 'w') as fh:
+        fh.write("\n".join(src))
+

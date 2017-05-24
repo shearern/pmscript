@@ -1,7 +1,7 @@
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from .exceptions import RequestError
+from .exceptions import RequestError, RestAttributeMissing
 
 class ChildRestObjectCollection: pass
 
@@ -95,11 +95,12 @@ class RestObject(metaclass=ABCMeta):
             if optional:
                 return default
             else:
-                raise RequestError("Data for %s at level %s doesn't have key %s.\nKeys are: %s" % (
-                                   self.__class__.__name__,
-                                   self.data_level_desc,
-                                   key,
-                                   ', '.join(sorted(self.data.keys()))))
+                raise RestAttributeMissing(
+                    "Data for %s at level %s doesn't have key %s.\nKeys are: %s" % (
+                    self.__class__.__name__,
+                    self.data_level_desc,
+                    key,
+                    ', '.join(sorted(self.data.keys()))))
 
 
     def _retireve_obj_detail(self):

@@ -20,7 +20,7 @@ def arg_parser():
     )
 
     # Add parsers for sub commands
-    for cmd in ALL_CMDS.values():
+    for cmd in sorted(ALL_CMDS.values(), key=lambda c: c.cmd_name):
         sub_parser = subparsers.add_parser(cmd.cmd_name, help=cmd.cmd_help)
         cmd.add_cmdline_args(sub_parser)
 

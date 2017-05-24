@@ -2,22 +2,23 @@
 from .RestObject import RestObject
 from .Process import Process
 from .Case import Case
+from .Task import Task
 from .RestIF import RestIF
 
 class PMServer:
     '''Access the root level of the PM Server'''
 
     def __init__(self, creds):
-        self.__if = RestIF(creds)
+        self.rif = RestIF(creds)
 
 
     def list_processes(self):
         '''Get a list of projects'''
-        return Process.list_processes(self.__if)
+        return Process.list_processes(self.rif)
 
 
     def list_cases(self):
-        return Case.list_cases(self.__if)
+        return Case.list_cases(self.rif)
 
 
     def find_case(self, name, process=None):
@@ -47,8 +48,8 @@ class PMServer:
         # Is case UID cached
         hit = False
         cache_key = 'Case.UID.search.%s.%s' % (str(process), name)
-        if self.__if.cache.has(cache_key):
-            cached_case = Case(self.__if, uid=self.__if.cache[cache_key]) # TODO: Need to check if uid is deleted?
+        if self.rif.cache.has(cache_key):
+            cached_case = Case(self.rif, uid=self.rif.cache[cache_key]) # TODO: Need to check if uid is deleted?
             if _matches_process(cached_case):
                 found = cached_case
                 hit = True
@@ -67,7 +68,7 @@ class PMServer:
         # Cache results
         if found is not None:
             if not hit:
-                self.__if.cache[cache_key] = case.uid
+                self.rif.cache[cache_key] = case.uid
 
         return found
 
@@ -101,8 +102,8 @@ class PMServer:
         # Is case UID cached
         hit = False
         cache_key = 'Case.UID.search.%s.%s' % (str(process), name)
-        if self.__if.cache.has(cache_key):
-            cached_case = Case(self.__if, uid=self.__if.cache[cache_key]) # TODO: Need to check if uid is deleted?
+        if self.rif.cache.has(cache_key):
+            cached_case = Case(self.rif, uid=self.rif.cache[cache_key]) # TODO: Need to check if uid is deleted?
             if _matches_process(cached_case):
                 found = cached_case
                 hit = True
@@ -121,6 +122,7 @@ class PMServer:
         # Cache results
         if found is not None:
             if not hit:
-                self.__if.cache[cache_key] = case.uid
+                self.rif.cache[cache_key] = case.uid
 
         return found
+
