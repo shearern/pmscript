@@ -44,6 +44,7 @@ class Cache:
             delete from ENTRIES
             where EXPIRE_AT < ?
           """, (datetime.now().strftime(self.DATE_FORMAT), ))
+        self.__conn.commit()
 
 
     @property
@@ -54,14 +55,14 @@ class Cache:
 
     def has(self, key):
         curs = self.__conn.cursor()
-        curs.execute("select count(*) from ENTRIES where KEY = ?", str(key))
+        curs.execute("select count(*) from ENTRIES where KEY = ?", (str(key), ))
         return curs.fetchone()[0] > 0
 
 
     def get(self, key):
         try:
             curs = self.__conn.cursor()
-            curs.execute("select DATA from ENTRIES where KEY = ?", str(key))
+            curs.execute("select DATA from ENTRIES where KEY = ?", (str(key), ))
             stored = curs.fetchone()[0]
             return json.loads(stored)
         except Exception as e:
@@ -69,13 +70,21 @@ class Cache:
 
 
     def set(self, key, data):
-        self.__conn.cursor().execute("delete from ENTRIES where KEY = ?", str(key))
+        self.__conn.cursor().execute("delete from ENTRIES where KEY = ?", (str(key), ))
 
+        expire_date = datetime.now() + self.__expire_delta
         self.__conn.cursor().execute(
-            "set KEY = ?, DATA = ?, EXPIRE_AT = ? ENTRIES where KEY = ?",
-            str(key),
-            json.dumps(data),
-            (datetime.now() + self.__expire_delta).strftime(self.DATE_FORMAT))
+            """
+                insert into ENTRIES (KEY, DATA, EXPIRE_AT)
+                values (?, ?, ?)
+            """,
+            (str(key), json.dumps(data), expire_date.strftime(self.DATE_FORMAT), ))
+
+        self.__conn.commit()
 
 
+    def __getitem__(self, key):
+        return self.get(key)
+    def __setitem__(self, key, value):
+        self.set(key, value)
 

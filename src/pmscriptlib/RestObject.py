@@ -67,12 +67,13 @@ class RestObject(metaclass=ABCMeta):
             raise Exception("Invalid data level: " + str(self.__data_level))
 
 
-    def _rest_obj_attr(self, level, key, optional=False, default=None):
+    def _rest_obj_attr(self, level, key, optional=False, default=None, alt=None):
         '''
         Get a attribute value
 
         :param level: The level the retrieval granularity level that is needed to get this attribute
         :param key: The data key
+        :param alt: Alternate data keys
         '''
 
         if self.__data_level < level:
@@ -81,12 +82,23 @@ class RestObject(metaclass=ABCMeta):
         try:
             return self.data[key]
         except KeyError:
+
+            # Try alt keys
+            if alt is not None:
+                for alt_key in alt:
+                    try:
+                        return self.data[alt_key]
+                    except KeyError:
+                        pass
+
+            # Handle key is missing error
             if optional:
                 return default
             else:
                 raise RequestError("Data for %s at level %s doesn't have key %s.\nKeys are: %s" % (
                                    self.__class__.__name__,
                                    self.data_level_desc,
+                                   key,
                                    ', '.join(sorted(self.data.keys()))))
 
 
@@ -131,7 +143,8 @@ class RestObject(metaclass=ABCMeta):
 
     def _detail_url(self):
         '''URL to retrieve detail for this object'''
-        raise NotImplementedError("Need to define _detail_url() or _retireve_obj_detail()")
+        raise NotImplementedError("Need to define _detail_url() or _retireve_obj_detail() for %s" % (
+            self.__class__.__name__))
 
 
     @abstractproperty

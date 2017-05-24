@@ -40,7 +40,7 @@ class {class_name}(Command):
 
     def add_cmdline_args(self, parser):
         '''Add commandline arguments specific to this command'''
-        pass
+        # parser.add_argument('--process', help="Name or UID of the process to list cases for.")
 
 
     def run(self, args):

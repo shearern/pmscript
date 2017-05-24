@@ -7,7 +7,8 @@ Script for interacting with a ProcessMaker server
 Usage
 -----
 
-    usage: pmscript.py [-h] [--creds CREDS] {list_projects,init} ...
+    usage: pmscript.py [-h] [--creds CREDS]
+                       {list_processes,list_cases,init,list_vars} ...
     
     Script for interacting with a ProcessMaker server
     
@@ -18,7 +19,10 @@ Usage
     commands:
       valid commands
     
-      {list_projects,init}
-        list_projects       List all of the projects (processes or workflows)
+      {list_processes,list_cases,init,list_vars}
+        list_processes      List all of the projects (processes or workflows)
                             defined
+        list_cases          List cases
         init                Initialize a new credentials file
+        list_vars           Show the current variable values for a case
+

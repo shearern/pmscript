@@ -99,8 +99,19 @@ class Case(RestObject):
 
 
     @property
-    def title(self):
-        return self._rest_obj_attr(self.LIST_LVL, 'app_title')
+    def name(self):
+        return self._rest_obj_attr(self.LIST_LVL, 'app_name', alt=('app_title', ))
+
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return 'Case(uid="%s")' % (self.uid)
+
+
+    def _detail_url(self):
+        return '{base}/api/1.0/{workspace}/cases/%s' % (self.uid)
 
 
     @property
@@ -112,8 +123,22 @@ class Case(RestObject):
     @property
     def process(self):
         '''Process object this case is an instance of'''
-        return self._assoc_rest_obj('Project', self.process_uid)
+        return self._assoc_rest_obj('Process', self.process_uid)
 
+
+    @property
+    def variables(self):
+        '''Current variable values for the case'''
+        try:
+            return self.__variables.copy()
+        except AttributeError:
+            self.__variables = self._retrieve_variable_values()
+            return self.__variables.copy()
+
+
+    def _retrieve_variable_values(self):
+        url = '{base}/api/1.0/{workspace}/cases/%s/variables' % (self.uid)
+        return self.rif.get(url)
 
 
     @staticmethod

@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 import json
 
@@ -85,6 +86,7 @@ class RestIF:
                         raise CredentialsError("Unauthorized to access %s" % (url))
                     # Try to login
                     else:
+                        print("Access token has expired.  Requesting new one.", file=sys.stderr)
                         self.__trying_login = True
                         self._get_new_access_token()
                         rtn = self.get(url)

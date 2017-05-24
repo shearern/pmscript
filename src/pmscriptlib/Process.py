@@ -302,7 +302,7 @@ class Process(RestObject):
 
 
     def __repr__(self):
-        return 'Process(prj_uid="%s")' % (self.uid)
+        return 'Process(uid="%s")' % (self.uid)
 
 
 
