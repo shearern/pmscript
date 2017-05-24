@@ -3,6 +3,8 @@ import requests
 from .RestObject import RestObject
 from .exceptions import RequestError
 
+from .Task import Task
+
 class Case(RestObject):
     '''
     A running process instance
@@ -139,6 +141,21 @@ class Case(RestObject):
     def _retrieve_variable_values(self):
         url = '{base}/api/1.0/{workspace}/cases/%s/variables' % (self.uid)
         return self.rif.get(url)
+
+
+    def set_variables(self, values):
+        '''
+        Set a case variable
+
+        :param values: Dictionary of values to set
+        '''
+        data = {k: str(v) for (k, v) in values.items()}
+        self.rif.put('{base}/api/1.0/{workspace}/cases/%s/variable' % (self.uid),
+                     data=data)
+
+
+    def list_current_tasks(self):
+        return Task.list_tasks_for_case(self.rif, self.uid)
 
 
     @staticmethod

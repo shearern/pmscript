@@ -112,3 +112,60 @@ class RestIF:
 
 
 
+    def put(self, url, data=None):
+        '''
+        Make a PUT reqest and check for errors
+
+        :param url: URL to post to (with {base} and {workspace}
+        :param data: Data to post
+        '''
+
+        # Make sure we have an access token
+        if self.creds.access_token is None:
+            self._get_new_access_token()
+
+        # Format URL
+        url = url.format(
+            base = self.creds.base_url,
+            workspace = self.creds.workspace)
+        headers = {
+            'Authorization': 'Bearer ' + self.creds.access_token,
+        }
+
+        # Make Request
+        r = requests.put(url, headers=headers, data=data)
+
+        # Check response
+        if not r.ok:
+
+            # Retrieve error message
+            try:
+                response_data = r.json()
+            except:
+                response_data = "Text: " + r.text()
+
+            # Check for expired access token
+            try:
+                if response_data['error']['message'] == "Unauthorized":
+                    # Already tried to relogin?
+                    if self.__trying_login:
+                        raise CredentialsError("Unauthorized to access %s" % (url))
+                    # Try to login
+                    else:
+                        print("Access token has expired.  Requesting new one.", file=sys.stderr)
+                        self.__trying_login = True
+                        self._get_new_access_token()
+                        rtn = self.get(url)
+                        self.__trying_login = False
+                        return rtn
+            except:
+                pass
+
+            # Check for an error message
+            try:
+                raise RequestError("Got error %s while accessing %s" % (response_data['error']['message'], url))
+            except:
+                raise RequestError("Got responce %s while accessing %s" % (response_data, url))
+
+
+
